@@ -17,9 +17,10 @@ class CreateEventViewModel extends BaseModel {
 
   TextEditingController eventTitleTextController = TextEditingController();
   TextEditingController eventLocationTextController = TextEditingController();
+  TimeOfDay eventStartTime = TimeOfDay.now();
   TextEditingController eventDescriptionTextController =
       TextEditingController();
-  TimeOfDay eventStartTime = TimeOfDay.now();
+  TextEditingController maxAllowedAttendeesController = TextEditingController();
   TimeOfDay eventEndTime = TimeOfDay.now();
   DateTime eventStartDate = DateTime.now();
   DateTime eventEndDate = DateTime.now();
@@ -28,6 +29,7 @@ class CreateEventViewModel extends BaseModel {
   FocusNode titleFocus = FocusNode();
   FocusNode locationFocus = FocusNode();
   FocusNode descriptionFocus = FocusNode();
+  FocusNode maxAllowedAttendeesFocus = FocusNode();
 
   //late OrganizationService _organizationService;
   late final Map<String, bool> _adminCheckedMap = {};
@@ -60,6 +62,7 @@ class CreateEventViewModel extends BaseModel {
     titleFocus.unfocus();
     locationFocus.unfocus();
     descriptionFocus.unfocus();
+    maxAllowedAttendeesFocus.unfocus();
     validate = AutovalidateMode.always;
     if (formKey.currentState!.validate()) {
       validate = AutovalidateMode.disabled;
@@ -87,6 +90,7 @@ class CreateEventViewModel extends BaseModel {
         'title': eventTitleTextController.text,
         'description': eventDescriptionTextController.text,
         'location': eventLocationTextController.text,
+        'maxAllowedAttendees': maxAllowedAttendeesController.text.trim(),
         'isPublic': isPublicSwitch,
         'isRegisterable': isRegisterableSwitch,
         'recurring': false,

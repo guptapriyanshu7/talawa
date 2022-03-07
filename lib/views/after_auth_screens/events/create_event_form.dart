@@ -101,6 +101,33 @@ class CreateEventForm extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(
+            height: SizeConfig.screenHeight! * 0.013,
+          ),
+          TextFormField(
+            controller: model.maxAllowedAttendeesController,
+            focusNode: model.maxAllowedAttendeesFocus,
+            validator: (value) => Validator.validateMaxAllowedAttendees(value),
+            decoration: InputDecoration(
+              hintText: 'Max Allowed Attendees',
+              labelText: 'Max Allowed Attendees',
+              labelStyle: Theme.of(context).textTheme.subtitle1,
+              border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              prefixIcon: Container(
+                transform: Matrix4.translationValues(
+                  -SizeConfig.screenWidth! * 0.027,
+                  0.0,
+                  0.0,
+                ),
+                child: const Icon(
+                  Icons.people,
+                  size: 25,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

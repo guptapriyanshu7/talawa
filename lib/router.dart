@@ -11,6 +11,7 @@ import 'package:talawa/views/after_auth_screens/app_settings/app_settings_page.d
 import 'package:talawa/views/after_auth_screens/events/create_event_page.dart';
 import 'package:talawa/views/after_auth_screens/events/edit_event_page.dart';
 import 'package:talawa/views/after_auth_screens/events/event_info_page.dart';
+import 'package:talawa/views/after_auth_screens/events/event_tasks_page.dart';
 import 'package:talawa/views/after_auth_screens/events/explore_events.dart';
 import 'package:talawa/views/after_auth_screens/feed/individual_post.dart';
 import 'package:talawa/views/after_auth_screens/feed/organization_feed.dart';
@@ -27,6 +28,8 @@ import 'package:talawa/views/pre_auth_screens/select_organization.dart';
 import 'package:talawa/views/pre_auth_screens/set_url.dart';
 import 'package:talawa/views/pre_auth_screens/signup_details.dart';
 import 'package:talawa/views/pre_auth_screens/waiting_to_join_private_org.dart';
+
+import 'views/after_auth_screens/events/add_task_page.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
@@ -153,6 +156,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.appSettings:
       return MaterialPageRoute(
         builder: (context) => const AppSettingsPage(key: Key('AppSettings')),
+      );
+    case Routes.eventTasks:
+      final Event event = settings.arguments! as Event;
+      return MaterialPageRoute(
+        builder: (context) => EventTasksPage(
+          key: const Key('EventTasks'),
+          event: event,
+        ),
+      );
+    case Routes.addTask:
+      final Event event = settings.arguments! as Event;
+      return MaterialPageRoute(
+        builder: (context) => AddTaskPage(
+          key: const Key('AddTask'),
+          event: event,
+        ),
       );
 
     default:

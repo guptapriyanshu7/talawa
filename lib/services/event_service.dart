@@ -45,6 +45,9 @@ class EventService {
     final List eventsJson = result.data!["events"] as List;
     eventsJson.forEach((eventJsonData) {
       final Event event = Event.fromJson(eventJsonData as Map<String, dynamic>);
+      event.isRegistered = event.registrants?.any(
+              (registrant) => registrant.id == _userConfig.currentUser.id) ??
+          false;
       _eventStreamController.add(event);
     });
   }
@@ -57,6 +60,14 @@ class EventService {
     final result = await _dbFunctions.gqlAuthMutation(
       EventQueries().registerForEvent(),
       variables: variables,
+    );
+    return result;
+  }
+
+  Future<dynamic> fetchRegistrantsByEvent(String eventId) async {
+    await _dbFunctions.refreshAccessToken(userConfig.currentUser.refreshToken!);
+    final result = await _dbFunctions.gqlAuthQuery(
+      EventQueries().registrantsByEvent(eventId),
     );
     return result;
   }

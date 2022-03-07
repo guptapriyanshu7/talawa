@@ -114,4 +114,14 @@ class Validator {
     }
     return null;
   }
+
+  static String? validateMaxAllowedAttendees(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Max Allowed Attendees must not be left blank.';
+    }
+    if (int.tryParse(value) == null) {
+      return 'Max Allowed Attendees must be a number.';
+    }
+    return null;
+  }
 }

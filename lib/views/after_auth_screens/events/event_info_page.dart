@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:talawa/constants/routing_constants.dart';
 import 'package:talawa/enums/enums.dart';
 import 'package:talawa/locator.dart';
 import 'package:talawa/models/events/event_model.dart';
+import 'package:talawa/models/user/user_info.dart';
+import 'package:talawa/services/event_service.dart';
+import 'package:talawa/services/navigation_service.dart';
 import 'package:talawa/services/size_config.dart';
 import 'package:talawa/utils/app_localization.dart';
 import 'package:talawa/view_model/after_auth_view_models/event_view_models/event_info_view_model.dart';
@@ -49,12 +54,12 @@ class _EventInfoPageState extends State<EventInfoPage> {
                   onPressed: () {
                     model.registerForEvent();
                   },
-                  label: Text(
-                    model.fabTitle,
-                    style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                  ),
+                  label: Text(model.fabTitle,
+                      style: Theme.of(context).textTheme.bodyText2
+                      // .copyWith(
+                      //       color: Theme.of(context).colorScheme.secondary,
+                      //     ),
+                      ),
                 )
               : eventAdminFab(
                   context: context,
@@ -68,6 +73,19 @@ class _EventInfoPageState extends State<EventInfoPage> {
   }
 
   Widget _eventInfoBody(Event event) {
+    Future<List<User>> fetchRegistrantsByEvent(String eventId) async {
+      final fetchRegistrantsByEventQueryResult = await locator<EventService>()
+          .fetchRegistrantsByEvent(eventId) as QueryResult;
+      final registrantsJsonList = fetchRegistrantsByEventQueryResult
+          .data!['registrantsByEvent'] as List<Object?>;
+
+      return registrantsJsonList
+          .map((registrantJson) => User.fromJson(
+              registrantJson! as Map<String, dynamic>,
+              fromOrg: true))
+          .toList();
+    }
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -84,7 +102,15 @@ class _EventInfoPageState extends State<EventInfoPage> {
                       .headline4!
                       .copyWith(fontSize: 26),
                 ),
-                const Icon(Icons.chat_bubble_outline)
+                IconButton(
+                  icon: const Icon(Icons.checklist_rtl_rounded),
+                  onPressed: () {
+                    locator<NavigationService>().pushScreen(
+                      Routes.eventTasks,
+                      arguments: event,
+                    );
+                  },
+                ),
               ],
             ),
             Text(
@@ -182,6 +208,31 @@ class _EventInfoPageState extends State<EventInfoPage> {
                 ),
               ],
             ),
+            SizedBox(
+              height: SizeConfig.screenHeight! * 0.011,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.people,
+                  size: 12,
+                ),
+                SizedBox(
+                  width: SizeConfig.screenWidth! * 0.027,
+                ),
+                SizedBox(
+                  width: SizeConfig.screenWidth! * 0.88,
+                  child: Text(
+                    '${event.registrants?.length ?? 0} / ${event.maxAllowedAttendees}',
+                    style: Theme.of(context).textTheme.caption,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    maxLines: 3,
+                  ),
+                ),
+              ],
+            ),
 
             const Divider(),
             SizedBox(
@@ -207,12 +258,22 @@ class _EventInfoPageState extends State<EventInfoPage> {
               color: Theme.of(context).colorScheme.onBackground,
               thickness: 2,
             ),
-            CustomListTile(
-              index: 0,
-              key: const Key('Admins'),
-              type: TileType.user,
-              userInfo: userConfig.currentUser,
-              onTapUserInfo: () {},
+            ListView.builder(
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: event.admins!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return CustomListTile(
+                  key: Key(
+                    '${AppLocalizations.of(context)!.strictTranslate("Admins")}$index',
+                  ),
+                  index: index,
+                  type: TileType.user,
+                  userInfo: event.admins![index],
+                  onTapUserInfo: () {},
+                );
+              },
             ),
             SizedBox(
               height: SizeConfig.screenHeight! * 0.013,
@@ -242,23 +303,31 @@ class _EventInfoPageState extends State<EventInfoPage> {
             ),
 
             //  Needs to be replaced with event attendees
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 10,
-              itemBuilder: (BuildContext context, int index) {
-                return CustomListTile(
-                  key: Key(
-                    '${AppLocalizations.of(context)!.strictTranslate("Attendee")}$index',
-                  ),
-                  index: index,
-                  type: TileType.user,
-                  userInfo: userConfig.currentUser,
-                  onTapUserInfo: () {},
-                );
-              },
-            )
+            FutureBuilder<List<User>>(
+                builder: (_, snap) {
+                  if (snap.hasData) {
+                    return ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: snap.data!.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return CustomListTile(
+                          key: Key(
+                            '${AppLocalizations.of(context)!.strictTranslate("Attendee")}$index',
+                          ),
+                          index: snap.data!.length,
+                          type: TileType.user,
+                          userInfo: snap.data![index],
+                          onTapUserInfo: () {},
+                        );
+                      },
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+                future: fetchRegistrantsByEvent(event.id!)),
           ],
         ),
       ),

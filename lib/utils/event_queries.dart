@@ -20,7 +20,17 @@ class EventQueries {
           startTime
           endTime
           location
-          isRegistered
+          # isRegistered
+          admins {
+            firstName
+            lastName
+          }
+          registrants {
+            userId
+            user {
+              _id
+            }
+          }
           creator{
             _id
             firstName
@@ -29,6 +39,19 @@ class EventQueries {
         }
       }
     """;
+  }
+
+  String registrantsByEvent(String eventId) {
+    return '''
+      query {
+        registrantsByEvent(id: "$eventId") {
+          _id
+          firstName
+          lastName
+          image
+        }
+      }
+    ''';
   }
 
   String addEvent() {
@@ -78,7 +101,7 @@ class EventQueries {
         _id
         title
         description
-        isRegistered
+        # isRegistered
       }
     }
   """;

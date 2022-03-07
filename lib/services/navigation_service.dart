@@ -62,7 +62,7 @@ class NavigationService {
     );
   }
 
-  void pop() {
-    return navigatorKey.currentState!.pop();
+  void pop([dynamic result]) {
+    return navigatorKey.currentState!.pop(result);
   }
 }

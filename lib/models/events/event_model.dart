@@ -22,6 +22,7 @@ class Event {
     this.organization,
     this.admins,
     this.registrants,
+    this.maxAllowedAttendees,
   });
 
   factory Event.fromJson(
@@ -43,6 +44,7 @@ class Event {
       isPublic: json['isPublic'] as bool?,
       isRegistered: json['isRegistered'] as bool?,
       isRegisterable: json['isRegisterable'] as bool?,
+      maxAllowedAttendees: json['maxAllowedAttendees'] as int? ?? 50,
       creator: json['creator'] == null
           ? null
           : User.fromJson(
@@ -60,7 +62,7 @@ class Event {
               )
               .toList(),
       registrants: (json['registrants'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>, fromOrg: true))
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>, fromOrg: false))
           .toList(),
     );
   }
@@ -83,4 +85,5 @@ class Event {
   OrgInfo? organization;
   List<User>? admins;
   List<User>? registrants;
+  int? maxAllowedAttendees;
 }
